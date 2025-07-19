@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      data-bs-theme="dark">
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
 <head>
     <title>Detalle Completo de Transacciones</title>
     <!-- Bootstrap CSS -->
@@ -20,36 +19,53 @@
         .dataTables_wrapper .dataTables_paginate .paginate_button {
             padding: 0.3em 0.8em;
         }
+        /* Ajuste para encabezados agrupados */
+        .group-header {
+            text-align: center;
+            font-weight: bold;
+        }
+        /* Scroll horizontal */
+        .dataTables_scrollBody {
+            overflow-x: auto !important;
+        }
     </style>
 </head>
-<body class="bg-light">
-<div class="container mt-5">
+<body class="bg-dark text-light">
+<div class="container-fluid mt-5">
     <h2 class="mb-4 text-center">Detalle Completo de Transacciones</h2>
 
     <div class="table-responsive">
-        <table id="transaccionesTable" class="table table-bordered table-striped table-details">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Usuario</th>
-                    <th>Contrato</th>
-                    <th>Fecha</th>
-                    <th>Nodo Recep.</th>
-                    <th>Desc. Recep.</th>
-                    <th>Nodo Ent.</th>
-                    <th>Desc. Ent.</th>
-                    <th>Zona Iny.</th>
-                    <th>Zona Ext.</th>
-                    <th>Gas Exceso</th>
-                    <th>Cargo Uso</th>
-                    <th>Cargo Gas</th>
-                    <th>Total Fact.</th>
-                    <th>Nom. Recep.</th>
-                    <th>Asig. Recep.</th>
-                    <th>Nom. Ent.</th>
-                    <th>Asig. Ent.</th>
-                    <th>Exc. Firme</th>
-                    <th>Uso Inter.</th>
+        <table id="transaccionesTable" class="table table-bordered table-striped table-hover table-details w-100">
+            <thead>
+                <!-- Fila de grupos de columnas (no afecta DataTables) -->
+                <tr class="table-dark group-header">
+                    <th class="text-nowrap" colspan="4">Información Básica</th>
+                    <th class="text-nowrap" colspan="4">Nodos</th>
+                    <th class="text-nowrap" colspan="2">Zonas</th>
+                    <th class="text-nowrap" colspan="1">Valores</th>
+                </tr>
+                <!-- Fila de encabezados reales para DataTables -->
+                <tr class="table-dark">
+                    <th class="text-nowrap">ID</th>
+                    <th class="text-nowrap">Usuario</th>
+                    <th class="text-nowrap">Contrato</th>
+                    <th class="text-nowrap">Fecha</th>
+                    <th class="text-nowrap">Nodo Recep.</th>
+                    <th class="text-nowrap">Desc. Recep.</th>
+                    <th class="text-nowrap">Nodo Ent.</th>
+                    <th class="text-nowrap">Desc. Ent.</th>
+                    <th class="text-nowrap">Zona Iny.</th>
+                    <th class="text-nowrap">Zona Ext.</th>
+                    <th class="text-nowrap">Gas Exceso</th>
+<!--                    <th class="text-nowrap">Cargo Uso</th>
+                    <th class="text-nowrap">Cargo Gas</th>
+                    <th class="text-nowrap">Total Fact.</th>
+                    <th class="text-nowrap">Nom. Recep.</th>
+                    <th class="text-nowrap">Asig. Recep.</th>
+                    <th class="text-nowrap">Nom. Ent.</th>
+                    <th class="text-nowrap">Asig. Ent.</th>
+                    <th class="text-nowrap">Exc. Firme</th>
+                    <th class="text-nowrap">Uso Inter.</th>-->
                 </tr>
             </thead>
             <tbody>
@@ -71,7 +87,7 @@
                     <td class="numeric-cell" 
                         th:text="${transaccion.gasExceso != null} ? 
                         ${#numbers.formatDecimal(transaccion.gasExceso, 1, 2)} : 'N/A'">-</td>
-                    <td class="numeric-cell" 
+<!--                <td class="numeric-cell" 
                         th:text="${transaccion.cargoUso != null} ? 
                         ${#numbers.formatDecimal(transaccion.cargoUso, 1, 2)} : 'N/A'">-</td>
                     <td class="numeric-cell" 
@@ -97,7 +113,7 @@
                         ${#numbers.formatDecimal(transaccion.excesoFirme, 1, 2)} : 'N/A'">-</td>
                     <td class="numeric-cell" 
                         th:text="${transaccion.usoInterrumpible != null} ? 
-                        ${#numbers.formatDecimal(transaccion.usoInterrumpible, 1, 2)} : 'N/A'">-</td>
+                        ${#numbers.formatDecimal(transaccion.usoInterrumpible, 1, 2)} : 'N/A'">-</td>-->
                 </tr>
             </tbody>
         </table>
@@ -123,8 +139,19 @@ $(document).ready(function() {
         pageLength: 10,
         lengthMenu: [5, 10, 25, 50, 100],
         columnDefs: [
-            { targets: [10,11,12,13,14,15,16,17,18,19], className: 'numeric-cell' }
-        ]
+            { 
+                targets: '_all', // Aplica a todas las columnas
+                className: 'dt-head-center' // Centra los encabezados
+            },
+            { 
+                targets: [10], // Aplica solo a la columna de Gas Exceso (ajusta según tus columnas visibles)
+                className: 'numeric-cell' 
+            }
+        ],
+        initComplete: function() {
+            // Ajuste para mantener los grupos de encabezados
+            $('.group-header').css('display', 'table-row');
+        }
     });
 });
 </script>
