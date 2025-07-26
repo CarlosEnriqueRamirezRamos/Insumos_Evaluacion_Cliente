@@ -2,7 +2,7 @@ package com.Insumos.Cliente.Insumos_Evaluacion_Cliente.ML;
 
 import java.util.Date;
 
-public class TransaccionDTO {
+public class Transaccion {
     private int idTransaccion;
     private Date fechaRegistro;
     private String nombreUsuario;

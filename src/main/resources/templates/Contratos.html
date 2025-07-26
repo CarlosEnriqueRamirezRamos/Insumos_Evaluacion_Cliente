@@ -1,159 +1,86 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
-<head>
-    <title>Detalle Completo de Transacciones</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    
-    <style>
-        .numeric-cell {
-            text-align: right;
-            padding-right: 20px;
-        }
-        .table-details {
-            font-size: 0.9rem;
-        }
-        /* Estilo para el paginado de DataTables */
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            padding: 0.3em 0.8em;
-        }
-        /* Ajuste para encabezados agrupados */
-        .group-header {
-            text-align: center;
-            font-weight: bold;
-        }
-        /* Scroll horizontal */
-        .dataTables_scrollBody {
-            overflow-x: auto !important;
-        }
-    </style>
-</head>
-<body class="bg-dark text-light">
-<div class="container-fluid mt-5">
-    <h2 class="mb-4 text-center">Detalle Completo de Transacciones</h2>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+    <head>
+        <title>Contratos</title>
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <!-- DataTables CSS -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+        <!-- CSS personalizado -->
+        <link rel="stylesheet" th:href="@{/css/styles.css}">
+    </head>
+    <body>
+        <!-- Contenido principal -->
+        <div layout:fragment="content">
+            <div class="container-fluid mt-5">
+                <h2 class="mb-4 text-center">Detalle De los contratos del cliente</h2>
 
-    <div class="table-responsive">
-        <table id="transaccionesTable" class="table table-bordered table-striped table-hover table-details w-100">
-            <thead>
-                <!-- Fila de grupos de columnas (no afecta DataTables) -->
-                <tr class="table-dark group-header">
-                    <th class="text-nowrap" colspan="4">Información Básica</th>
-                    <th class="text-nowrap" colspan="4">Nodos</th>
-                    <th class="text-nowrap" colspan="2">Zonas</th>
-                    <th class="text-nowrap" colspan="1">Valores</th>
-                </tr>
-                <!-- Fila de encabezados reales para DataTables -->
-                <tr class="table-dark">
-                    <th class="text-nowrap">ID</th>
-                    <th class="text-nowrap">Usuario</th>
-                    <th class="text-nowrap">Contrato</th>
-                    <th class="text-nowrap">Fecha</th>
-                    <th class="text-nowrap">Nodo Recep.</th>
-                    <th class="text-nowrap">Desc. Recep.</th>
-                    <th class="text-nowrap">Nodo Ent.</th>
-                    <th class="text-nowrap">Desc. Ent.</th>
-                    <th class="text-nowrap">Zona Iny.</th>
-                    <th class="text-nowrap">Zona Ext.</th>
-                    <th class="text-nowrap">Gas Exceso</th>
-<!--                    <th class="text-nowrap">Cargo Uso</th>
-                    <th class="text-nowrap">Cargo Gas</th>
-                    <th class="text-nowrap">Total Fact.</th>
-                    <th class="text-nowrap">Nom. Recep.</th>
-                    <th class="text-nowrap">Asig. Recep.</th>
-                    <th class="text-nowrap">Nom. Ent.</th>
-                    <th class="text-nowrap">Asig. Ent.</th>
-                    <th class="text-nowrap">Exc. Firme</th>
-                    <th class="text-nowrap">Uso Inter.</th>-->
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="transaccion : ${listaTransacciones}">
-                    <td th:text="${transaccion.idTransaccion}">-</td>
-                    <td th:text="${transaccion.nombreUsuario}">-</td>
-                    <td th:text="${transaccion.claveContrato}">-</td>
-                    <td th:text="${transaccion.fechaRegistro != null} ? 
-                        ${#dates.format(transaccion.fechaRegistro, 'dd/MM/yyyy HH:mm')} : 'N/A'">-</td>
-                    
-                    <td th:text="${transaccion.claveNodoRecepcion}">-</td>
-                    <td th:text="${transaccion.descNodoRecepcion}">-</td>
-                    <td th:text="${transaccion.claveNodoEntrega}">-</td>
-                    <td th:text="${transaccion.descNodoEntrega}">-</td>
-                    
-                    <td th:text="${transaccion.zonaInyeccion}">-</td>
-                    <td th:text="${transaccion.zonaExtraccion}">-</td>
-                    
-                    <td class="numeric-cell" 
-                        th:text="${transaccion.gasExceso != null} ? 
-                        ${#numbers.formatDecimal(transaccion.gasExceso, 1, 2)} : 'N/A'">-</td>
-<!--                <td class="numeric-cell" 
-                        th:text="${transaccion.cargoUso != null} ? 
-                        ${#numbers.formatDecimal(transaccion.cargoUso, 1, 2)} : 'N/A'">-</td>
-                    <td class="numeric-cell" 
-                        th:text="${transaccion.cargoGasExceso != null} ? 
-                        ${#numbers.formatDecimal(transaccion.cargoGasExceso, 1, 2)} : 'N/A'">-</td>
-                    <td class="numeric-cell" 
-                        th:text="${transaccion.facturaTotal != null} ? 
-                        ${#numbers.formatDecimal(transaccion.facturaTotal, 1, 2)} : 'N/A'">-</td>
-                    <td class="numeric-cell" 
-                        th:text="${transaccion.nominadaRecepcion != null} ? 
-                        ${#numbers.formatDecimal(transaccion.nominadaRecepcion, 1, 2)} : 'N/A'">-</td>
-                    <td class="numeric-cell" 
-                        th:text="${transaccion.asignadaRecepcion != null} ? 
-                        ${#numbers.formatDecimal(transaccion.asignadaRecepcion, 1, 2)} : 'N/A'">-</td>
-                    <td class="numeric-cell" 
-                        th:text="${transaccion.nominadaEntrega != null} ? 
-                        ${#numbers.formatDecimal(transaccion.nominadaEntrega, 1, 2)} : 'N/A'">-</td>
-                    <td class="numeric-cell" 
-                        th:text="${transaccion.asignadaEntrega != null} ? 
-                        ${#numbers.formatDecimal(transaccion.asignadaEntrega, 1, 2)} : 'N/A'">-</td>
-                    <td class="numeric-cell" 
-                        th:text="${transaccion.excesoFirme != null} ? 
-                        ${#numbers.formatDecimal(transaccion.excesoFirme, 1, 2)} : 'N/A'">-</td>
-                    <td class="numeric-cell" 
-                        th:text="${transaccion.usoInterrumpible != null} ? 
-                        ${#numbers.formatDecimal(transaccion.usoInterrumpible, 1, 2)} : 'N/A'">-</td>-->
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+                <div class="table-responsive">
+                    <table id="transaccionesTable" class="table table-striped table-hover w-100">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID Contrato</th>
+                                <th>Clave</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="contrato : ${contratos}">
+                                <td th:text="${contrato.idContrato}"></td>
+                                <td th:text="${contrato.claveContrato}"></td>
+                                <!-- Agrega más celdas según tu modelo -->
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- Mensaje cuando no hay contratos -->
+                    <div th:if="${contratos != null and contratos.empty}" class="alert alert-info">
+                        No se encontraron contratos para este usuario.
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!-- jQuery (requerido por DataTables) -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<!-- DataTables Bootstrap 5 Integration -->
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-<script>
-$(document).ready(function() {
-    $('#transaccionesTable').DataTable({
-        responsive: true,
-        dom: '<"top"lf>rt<"bottom"ip>',
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json'
-        },
-        scrollX: true,
-        pageLength: 10,
-        lengthMenu: [5, 10, 25, 50, 100],
-        columnDefs: [
-            { 
-                targets: '_all', // Aplica a todas las columnas
-                className: 'dt-head-center' // Centra los encabezados
-            },
-            { 
-                targets: [10], // Aplica solo a la columna de Gas Exceso (ajusta según tus columnas visibles)
-                className: 'numeric-cell' 
-            }
-        ],
-        initComplete: function() {
-            // Ajuste para mantener los grupos de encabezados
-            $('.group-header').css('display', 'table-row');
-        }
-    });
-});
-</script>
+        <!-- Fragmento de scripts -->
+    <th:block layout:fragment="scripts">
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+        <!-- Bootstrap Bundle -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- DataTables -->
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+        <!-- Bootstrap Icons -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+        <!-- Configuración avanzada de DataTables -->
+        <script th:inline="javascript">
+            $(document).ready(function () {
+                const table = $('#transaccionesTable').DataTable({
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json'
+                    },
+                    responsive: true,
+                    dom: '<"top"<"row"<"col-md-6"l><"col-md-6"f>>>rt<"bottom"<"row"<"col-md-6"i><"col-md-6"p>>>',
+                    pageLength: 10,
+                    lengthMenu: [5, 10, 25, 50, 100],
+                    initComplete: function () {
+                        // Personalizar el buscador
+                        $('#searchInput').on('keyup', function () {
+                            table.search(this.value).draw();
+                        });
+                    },
+                    columnDefs: [
+                        {
+                            targets: '_all', // Aplica a todas las columnas
+                            className: 'dt-head-center' // Centra los encabezados
+                        }
+                    ]
+                });
+            });
+        </script>
+    </th:block>
 </body>
 </html>

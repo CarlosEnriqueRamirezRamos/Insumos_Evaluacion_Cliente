@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+    <head>
+        <title>Detalle Completo de Transacciones</title>
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <!-- DataTables CSS -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+        <!-- CSS personalizado -->
+        <link rel="stylesheet" th:href="@{/css/styles.css}">
+    </head>
+    <body>
+        <!-- Contenido principal -->
+        <div layout:fragment="content">
+            <div class="container-fluid mt-5">
+                <h2 class="mb-4 text-center">Detalle Completo de Transacciones</h2>
+
+                <div class="table-responsive">
+                    <table id="transaccionesTable" class="table table-striped table-hover w-100">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="usuario : ${listaUsuarios}">
+                                <td th:text="${usuario.idUsuario}">-</td>
+                                <td th:text="${usuario.nombre}">-</td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a th:href="@{'/contratos/Contratos/' + ${usuario.idUsuario}}"
+                                           class="btn btn-sm btn-primary me-2">
+                                            <i class="bi bi-file-earmark-text"></i> Contratos
+                                        </a>
+                                        <a th:href="@{/usuarios/{id}/editar(id=${usuario.idUsuario})}" 
+                                           class="btn btn-sm btn-warning me-2">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
+                                        <a th:href="@{/usuarios/{id}/eliminar(id=${usuario.idUsuario})}" 
+                                           class="btn btn-sm btn-danger"
+                                           onclick="return confirm('¿Estás seguro de eliminar este usuario?');">
+                                            <i class="bi bi-trash"></i> Eliminar
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Fragmento de scripts -->
+    <th:block layout:fragment="scripts">
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+        <!-- Bootstrap Bundle -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- DataTables -->
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+        <!-- Bootstrap Icons -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+        <!-- Configuración avanzada de DataTables -->
+        <script th:inline="javascript">
+                                                   $(document).ready(function () {
+                                                       const table = $('#transaccionesTable').DataTable({
+                                                           language: {
+                                                               url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json'
+                                                           },
+                                                           responsive: true,
+                                                           dom: '<"top"<"row"<"col-md-6"l><"col-md-6"f>>>rt<"bottom"<"row"<"col-md-6"i><"col-md-6"p>>>',
+                                                           pageLength: 10,
+                                                           lengthMenu: [5, 10, 25, 50, 100],
+                                                           initComplete: function () {
+                                                               // Personalizar el buscador
+                                                               $('#searchInput').on('keyup', function () {
+                                                                   table.search(this.value).draw();
+                                                               });
+                                                           },
+                                                           columnDefs: [
+                                                               {
+                                                                   targets: [2], // Columna de acciones
+                                                                   orderable: false,
+                                                                   searchable: false
+                                                               }
+                                                           ]
+                                                       });
+                                                   });
+        </script>
+    </th:block>
+</body>
+</html>
