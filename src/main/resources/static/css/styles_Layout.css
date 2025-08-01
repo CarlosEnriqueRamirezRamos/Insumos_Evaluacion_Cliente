@@ -1,153 +1,58 @@
+/* ========================================================================= */
+/* --- 1. Variables Globales del Contenido --- */
+/* ========================================================================= */
 :root {
-    --sidebar-width: 200px;
-    --sidebar-collapsed: 60px;
-    --navbar-height: 56px;
-    --transition-speed: 0.3s;
-    --primary-gradient: linear-gradient(-45deg, #42d4f5, #42f5aa);
-    --text-color: #333;
-    --bg-color: #f8f9fa;
+    --font-primary: 'DM Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --color-text-dark: #f8f9fa; /* Color de texto para el tema oscuro */
+    --color-bg-dark: #1f1f1f; /* Fondo principal oscuro */
+    --color-table-header-dark: #495057; /* Header de tabla en tema oscuro */
+    --color-table-row-odd-dark: rgba(255, 255, 255, 0.05);
+    --color-table-row-hover-dark: rgba(255, 255, 255, 0.075);
+    --color-primary: #6366f1; /* Para gradientes, botones, etc. */
+    --color-primary-alt: #8b5cf6;
+    --color-primary-dark: #4f46e5;
+    --transition-fast: 0.15s ease-in-out;
 }
 
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    font-family: 'Roboto', sans-serif;
+/* ========================================================================= */
+/* --- 2. Estilos de Contenido General --- */
+/* ========================================================================= */
+body {
+    font-family: var(--font-primary);
+    line-height: 1.6;
+    color: var(--color-text-dark);
+    background-color: var(--color-bg-dark);
 }
 
-/* Navbar */
-.navbar {
-    background-color: #2c3e50;
-    height: var(--navbar-height);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1030;
+h2.mb-4.text-center {
+    word-break: break-word;
 }
 
-.navbar-brand {
-    font-weight: 500;
-    color: white !important;
+/* Contenedor principal ocupa el 100% de la altura */
+#root, .main-container, .page-wrapper {
+    background-color: var(--color-bg-dark);
+    min-height: 100vh;
 }
 
-.nav-link {
-    color: rgba(255, 255, 255, 0.8) !important;
-    transition: color 0.2s;
+/* Estilos para DataTables */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+    color: var(--color-text-dark) !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    color: var(--color-text-dark) !important;
+}
+.dataTables_wrapper .dataTables_info {
+    color: var(--color-text-dark);
+    background-color: var(--color-bg-dark);
+    padding: 10px 0 0 0;
 }
 
-.nav-link:hover {
-    color: white !important;
-}
-
-.btn-logout {
-    background-color: transparent;
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transition: all 0.2s;
-}
-
-.btn-logout:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
-}
-
-/* Menú flotante lateral */
-.burger-menu {
-    position: fixed;
-    top: 56px; /* altura navbar fixed-top */
-    left: 0;
-    width: 60px;
-    height: calc(100vh - 56px);
-    background-color: #2c3e50;
-    transition: width 0.3s ease;
-    overflow: hidden;
-    z-index: 1050; /* encima de todo menos navbar */
-    display: flex;
-    flex-direction: column;
-    padding-top: 10px;
-}
-
-.burger-menu.open {
-    width: 200px;
-}
-
-.burger-menu .menu-icon span {
-    display: none;
-    font-weight: 500;
-    font-size: 1rem;
-}
-
-/* Mostrar texto al abrir */
-.burger-menu.open .menu-icon span {
-    display: inline;
-}
-
-.burger-menu .menu-icon {
-    padding: 15px;
-    color: white;
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.menu-icon {
-    margin: 20px 0;
-    color: #fff;
-    font-size: 1.4rem;
-    cursor: pointer;
-    transition: color 0.3s ease;
-    position: relative;
-    width: 100%;
-    text-align: center;
-}
-
-.menu-icon:hover {
-    color: #1abc9c;
-}
-
-.menu-icon span {
-    display: none;
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #1abc9c;
-    padding: 5px 10px;
-    border-radius: 5px;
-    color: white;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    margin-left: 10px;
-    z-index: 999;
-}
-
-
-
-.menu-spacer {
-    flex-grow: 1;
-}
-
-/* Contenido principal SIN desplazamiento */
-.main-content {
-    margin-top: 56px; /* altura navbar */
-    margin-left: 60px; /* ancho menú cerrado */
-    padding: 20px;
-    transition: margin-left 0.3s ease;
-}
-
-.burger-menu.open ~ .main-content {
-    margin-left: 200px;
-}
-
-/* Tablas */
+/* ========================================================================= */
+/* --- 3. Estilos de Tablas --- */
+/* ========================================================================= */
 .table-responsive {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -157,10 +62,10 @@ html, body {
 }
 
 .table {
-    background-color: white;
+    background-color: var(--color-bg-dark);
     width: 100%;
     margin-bottom: 1rem;
-    color: #212529;
+    color: var(--color-text-dark);
 }
 
 .table th {
@@ -169,37 +74,91 @@ html, body {
     vertical-align: middle;
 }
 
+/* Estilos de filas para tema oscuro */
+.table.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: var(--color-table-row-odd-dark);
+}
+.table.table-hover > tbody > tr:hover {
+    background-color: var(--color-table-row-hover-dark);
+}
+
+/* Estilos para la tabla compacta */
+.table-details.table-compact th,
+.table-details.table-compact td {
+    padding: 0.3rem !important;
+    font-size: 0.75rem !important;
+}
+
+/* ========================================================================= */
+/* --- 4. Estilos de Modal --- */
+/* ========================================================================= */
+.modal-advanced .modal-content {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-dark);
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    border: 1px solid #444;
+}
+
+.modal-advanced .modal-header {
+    border-bottom: 1px solid #444;
+    color: white;
+}
+
+.modal-advanced .modal-title {
+    color: white;
+    font-weight: 600;
+}
+
+.modal-advanced .btn-close {
+    filter: invert(1);
+}
+
+.modal-advanced .modal-body {
+    padding: 1.5rem;
+}
+
+.modal-advanced .modal-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.modal-advanced .modal-table th,
+.modal-advanced .modal-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #444;
+    color: #ddd;
+}
+
+.modal-advanced .total-row {
+    background: #2a2a2a;
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
+.modal-advanced .modal-footer {
+    border-top: 1px solid #444;
+}
+
+.btn-close-modal {
+    background-color: #555;
+    color: white;
+    border: none;
+}
+
+.btn-close-modal:hover {
+    background-color: #777;
+}
+
 /* Footer */
 footer {
     background-color: #2c3e50;
     color: white;
     padding: 15px 0;
     text-align: center;
-    position: relative;
+    position: fixed;
     bottom: 0;
     width: 100%;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    :root {
-        --sidebar-width: 160px;
-        --sidebar-collapsed: 50px;
-    }
-
-    .menu-icon span {
-        font-size: 0.85rem;
-    }
-}
-
-@media (max-width: 576px) {
-    :root {
-        --sidebar-width: 140px;
-        --sidebar-collapsed: 50px;
-    }
-
-    .main-content {
-        padding: 15px;
-        padding-top: calc(var(--navbar-height) + 15px);
-    }
+    z-index: 1030;
 }

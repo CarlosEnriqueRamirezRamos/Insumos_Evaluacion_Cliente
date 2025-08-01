@@ -1,47 +1,196 @@
-/* ===== Variables globales ===== */
+/* ========================================================================= */
+/* --- 1. Variables Globales y Reset --- */
+/* ========================================================================= */
 :root {
+    /* Variables de Layout y App */
+    --sidebar-width: 200px;
+    --sidebar-collapsed: 60px;
+    --navbar-height: 56px;
+    --transition-speed: 0.3s;
+
+    /* Variables de color y tipografía (unificadas de ambos archivos) */
     --font-primary: 'DM Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    --color-text-light: #333;
-    --color-bg-light: #f8f9fa;
-    --color-text-dark: #f8f9fa;
-    --color-bg-dark: #212529;
-    --color-table-header-light: #343a40;
-    --color-table-header-dark: #495057;
-    --color-table-row-odd-light: rgba(0, 0, 0, 0.03);
-    --color-table-row-hover-light: rgba(0, 0, 0, 0.05);
+    --color-text-dark: #f8f9fa; /* Color de texto para el tema oscuro */
+    --color-bg-dark: #1f1f1f; /* Fondo principal oscuro */
+    --color-table-header-dark: #495057; /* Header de tabla en tema oscuro */
     --color-table-row-odd-dark: rgba(255, 255, 255, 0.05);
     --color-table-row-hover-dark: rgba(255, 255, 255, 0.075);
-    --color-primary: #6366f1; /* Para gradientes */
+    --color-primary: #6366f1; /* Para gradientes, botones, etc. */
     --color-primary-alt: #8b5cf6;
     --color-primary-dark: #4f46e5;
     --transition-fast: 0.15s ease-in-out;
+
+    /* Variables del layout (priorizando el estilo oscuro de la tabla) */
+    --table-bg: #2c3035;
+    --table-header-bg: #495057;
+    --table-row-bg: #343a40;
 }
 
-/* ===== Reset y estilos base ===== */
-body {
-    font-family: var(--font-primary);
-    line-height: 1.6;
-    color: var(--color-text-dark);
-    background-color: #1f1f1f;
+html, body {
+    height: 100%;
     margin: 0;
     padding: 0;
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-dark);
+    font-family: var(--font-primary);
+    line-height: 1.6;
 }
 
-/* Container centrado */
+/* ========================================================================= */
+/* --- 2. Estructura de la Aplicación (Layout) --- */
+/* ========================================================================= */
+
+/* Navbar */
+.navbar {
+    background-color: #2c3e50;
+    height: var(--navbar-height);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+}
+
+/* Navbar links y botones */
+.navbar-brand {
+    font-weight: 500;
+    color: white !important;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: white !important;
+}
+
+.btn-logout {
+    background-color: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.2s;
+}
+
+.btn-logout:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Menú flotante lateral (Sidebar) */
+.burger-menu {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    width: var(--sidebar-collapsed);
+    height: calc(100vh - var(--navbar-height));
+    background-color: #2c3e50;
+    transition: transform var(--transition-speed) ease, width var(--transition-speed) ease;
+    overflow: hidden;
+    z-index: 1050;
+    padding-top: 10px;
+    transform: translateX(0);
+}
+
+/* Cuando el menú está activo, aumenta su ancho */
+.burger-menu.active {
+    width: var(--sidebar-width);
+}
+
+/* Estilos de los íconos y texto dentro del menú */
+.burger-menu .menu-icon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.3s ease;
+}
+
+.burger-menu .menu-icon:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-primary);
+}
+
+.burger-menu .menu-icon span {
+    display: none; /* Oculta el texto por defecto */
+    font-weight: 500;
+    font-size: 1rem;
+    flex-grow: 1;
+    text-align: left;
+}
+
+/* Mostrar el texto cuando el menú está activo */
+.burger-menu.active .menu-icon span {
+    display: inline;
+}
+
+.menu-spacer {
+    flex-grow: 1;
+}
+
+/* Contenido principal */
+.main-content {
+    margin-top: var(--navbar-height);
+    padding: 20px;
+    transition: padding-left var(--transition-speed) ease;
+    padding-left: var(--sidebar-collapsed); /* Añade espacio para el menú cerrado */
+}
+
+/* Cuando el menú está abierto, el contenido principal se desplaza */
+body.sidebar-open .main-content {
+    padding-left: var(--sidebar-width);
+}
+
+.container-fluid {
+    padding-top: 30px;
+    padding-right: 20px;
+    padding-left: 70px;
+}
+
+/* Footer */
+footer {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+/* ========================================================================= */
+/* --- 3. Componentes de la página (Tablas, Botones, Modales) --- */
+/* ========================================================================= */
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
 
-/* ===== Tablas generales ===== */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
 .table {
     width: 100%;
     margin-bottom: 1rem;
     color: var(--color-text-dark);
-    background-color: #2c3035; /* Más oscuro que antes para cuerpo tabla */
+    background-color: var(--table-bg);
     border-collapse: separate;
-    border-spacing: 0 8px; /* Espacio vertical entre filas */
+    border-spacing: 0 8px;
     border-radius: 10px;
     overflow: hidden;
     font-size: 0.95rem;
@@ -49,29 +198,26 @@ body {
     box-shadow: 0 0 15px rgba(0,0,0,0.6);
 }
 
-/* Cabecera */
 .table thead th {
-    background-color: var(--color-table-header-dark);
+    background-color: var(--table-header-bg);
     color: var(--color-text-dark);
     font-weight: 600;
     border-bottom: 2px solid #6c757d;
     padding: 0.75rem 1rem;
 }
 
-/* Celdas */
 .table th,
 .table td {
     padding: 1rem 1.25rem;
     vertical-align: middle;
-    border-top: none; /* Quitamos bordes para mejor look */
+    border-top: none;
     transition: background-color var(--transition-fast);
     background-color: transparent;
     color: var(--color-text-dark);
 }
 
-/* Filas del body: fondo más oscuro para filas impares y pares */
 .table tbody tr {
-    background-color: #343a40;
+    background-color: var(--table-row-bg);
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     transition: background-color 0.3s ease;
@@ -81,7 +227,6 @@ body {
     background-color: #3a3f46;
 }
 
-/* Hover filas */
 .table tbody tr:hover {
     background-color: var(--color-primary);
     color: white;
@@ -89,21 +234,18 @@ body {
     box-shadow: 0 0 12px var(--color-primary);
 }
 
-/* Celdas numéricas alineadas a la derecha */
 .numeric-cell {
     text-align: right;
     padding-right: 20px;
 }
 
-/* Tabla más compacta para detalles */
 .table-details {
     font-size: 0.9rem;
 }
 
-/* DataTables paginación compacta */
 .dataTables_wrapper .dataTables_paginate .paginate_button {
     padding: 0.3em 0.8em;
-    color: var(--color-text-dark);
+    color: var(--color-text-dark) !important;
     background-color: #495057;
     border: none;
     border-radius: 4px;
@@ -115,11 +257,10 @@ body {
 .dataTables_wrapper .dataTables_paginate .paginate_button:focus,
 .dataTables_wrapper .dataTables_paginate .paginate_button.current {
     background-color: var(--color-primary);
-    color: white;
+    color: white !important;
     outline: none;
 }
 
-/* Cabeceras de grupos centradas */
 .group-header {
     text-align: center;
     font-weight: bold;
@@ -127,12 +268,24 @@ body {
     color: var(--color-text-dark);
 }
 
-/* Scroll horizontal forzado */
 .dataTables_scrollBody {
     overflow-x: auto !important;
 }
 
-/* ===== Botones ===== */
+.dataTables_wrapper {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-dark);
+    padding: 1rem 1rem 2rem 1rem;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    background-color: var(--color-bg-dark);
+    padding: 10px 0 0 0;
+    border-top: 1px solid #444;
+}
+
 .btn {
     display: inline-block;
     font-weight: 500;
@@ -164,13 +317,7 @@ body {
     box-shadow: 0 0 12px var(--color-primary-alt);
 }
 
-/* Accesibilidad: foco visible */
-.btn:focus-visible {
-    outline: 2px solid var(--color-primary-alt);
-    outline-offset: 2px;
-}
-
-/* ===== Modal avanzado estilo LukyVj ===== */
+/* Modal avanzado */
 .modal.fade.show {
     backdrop-filter: blur(6px);
     background-color: rgba(0, 0, 0, 0.7);
@@ -229,7 +376,7 @@ body {
 .modal-advanced .modal-table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 8px; /* espacio vertical en filas modal */
+    border-spacing: 0 8px;
 }
 
 .modal-advanced .modal-table th,
@@ -289,76 +436,121 @@ body {
     outline: none;
 }
 
-/* Fondo oscuro para el contenedor general de DataTables */
-.dataTables_wrapper {
-    background-color: var(--color-bg-dark);
-    color: var(--color-text-dark);
-    padding: 1rem 1rem 2rem 1rem; /* Para que no quede tan pegado abajo */
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
-}
+/* ========================================================================= */
+/* --- 4. Estilos de Autenticación (Login/Register) --- */
+/* ========================================================================= */
 
-/* Fondo oscuro para el paginador */
-.dataTables_wrapper .dataTables_paginate {
-    background-color: var(--color-bg-dark);
-    padding: 10px 0 0 0;
-    border-top: 1px solid #444;
-}
-
-/* Botones paginación ya los tienes, solo aseguramos color de texto */
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    color: var(--color-text-dark) !important;
-}
-
-/* Opcional: fondo oscuro para info y otros elementos de DataTables */
-.dataTables_wrapper .dataTables_info {
-    color: var(--color-text-dark);
-    background-color: var(--color-bg-dark);
-    padding: 10px 0 0 0;
-}
-
-/* Asegurar que el body no tenga margen inferior blanco */
-body {
-    background-color: var(--color-bg-dark);
-    margin-bottom: 0;
-}
-
-/* Asegurar que el fondo sea oscuro desde el html y todo contenedor */
-html {
-    background-color: var(--color-bg-dark);
-    height: 100%;
-}
-
-/* El body ocupa todo el alto también y tiene fondo oscuro */
-body {
-    background-color: var(--color-bg-dark);
-    color: var(--color-text-dark);
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-/* Contenedor principal ocupa el 100% de la altura */
-#root, .main-container, .page-wrapper {
-    background-color: var(--color-bg-dark);
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     min-height: 100vh;
-}
-
-/* Si usas TableContainer de MUI o similar */
-.MuiPaper-root,
-.MuiTableContainer-root {
-    background-color: var(--color-bg-dark) !important;
-    color: var(--color-text-dark);
-}
-
-/* Footer o zonas al final también deben ser oscuros */
-footer {
     background-color: var(--color-bg-dark);
-    color: var(--color-text-dark);
+    padding: 20px;
 }
 
-/* Eliminar cualquier borde blanco del final de DataTable */
-.dataTables_wrapper {
-    background-color: var(--color-bg-dark) !important;
-    border-bottom: none !important;
+.form-section {
+    background-color: #2c3035;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 450px;
+    transition: all 0.3s ease;
+}
+
+.form-section h1 {
+    color: var(--color-text-dark);
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-text-dark);
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: 1px solid #495057;
+    background-color: #343a40;
+    color: var(--color-text-dark);
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+.btn-action {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(to right, var(--color-primary), var(--color-primary-alt));
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-action:hover {
+    background: linear-gradient(to right, var(--color-primary-dark), var(--color-primary));
+    box-shadow: 0 0 12px var(--color-primary);
+}
+
+.toggle-link-container {
+    text-align: center;
+    margin-top: 20px;
+    color: #adb5bd;
+}
+
+.toggle-link-container a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.toggle-link-container a:hover {
+    color: var(--color-primary-alt);
+    text-decoration: underline;
+}
+
+.message-box {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.message-success {
+    background-color: rgba(40, 167, 69, 0.2);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+    color: #28a745;
+}
+
+.message-error {
+    background-color: rgba(220, 53, 69, 0.2);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    color: #dc3545;
+}
+
+.hidden {
+    display: none;
 }

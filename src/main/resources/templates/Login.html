@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Iniciar Sesión</title> <!-- Cambiado a v3 para confirmar la carga -->
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+        <!-- CSS personalizado -->
+        <link rel="stylesheet" th:href="@{/css/styles.css}">
+    </head>
+    <body>
+        <div class="auth-container">
+            <div id="login-section" class="form-section">
+                <h1>Iniciar Sesión</h1>
+
+                <div id="login-message-area" class="message-box hidden"></div>
+
+                <div th:if="${errorMessage}" class="message-box message-error">
+                    <p th:text="${errorMessage}"></p>
+                </div>
+
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-username">Nombre de Usuario</label>
+                        <input type="text" id="login-username" placeholder="Ingresa tu nombre de usuario" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">Contraseña</label>
+                        <input type="password" id="login-password" placeholder="Ingresa tu contraseña" required>
+                    </div>
+
+                    <button type="submit" class="btn-action">
+                        Iniciar Sesión
+                    </button>
+                </form>
+
+                <p class="toggle-link-container">
+                    ¿No tienes una cuenta? <a href="/contratos/register-page" id="show-register">Regístrate aquí</a>
+                </p>
+            </div>
+        </div>
+
+        <script>
+            const CLIENT_BASE_URL = 'http://localhost:8080';
+
+            const loginForm = document.getElementById('login-form');
+            const loginUsernameInput = document.getElementById('login-username');
+            const loginPasswordInput = document.getElementById('login-password');
+            const loginMessageArea = document.getElementById('login-message-area');
+
+            function showMessage(messageAreaElement, msg, type) {
+                messageAreaElement.textContent = msg;
+                messageAreaElement.className = `message-box ${type === 'success' ? 'message-success' : 'message-error'}`;
+                messageAreaElement.classList.remove('hidden');
+                setTimeout(() => {
+                    messageAreaElement.classList.add('hidden');
+                    messageAreaElement.textContent = '';
+                }, 5000);
+            }
+
+            // Función para redirigir a una URL protegida con el token JWT como query parameter
+            function redirectToProtectedPageWithToken(url, token) {
+                // Construye la URL con el token como parámetro de consulta
+                const redirectUrl = `${url}?token=${token}`;
+                console.log("DEBUG (Login.html): Redirigiendo a: " + redirectUrl);
+                window.location.href = redirectUrl; // Redirección directa del navegador
+            }
+
+            // Manejador para el envío del formulario de LOGIN
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const userName = loginUsernameInput.value;
+                const password = loginPasswordInput.value;
+
+                if (!userName || !password) {
+                    showMessage(loginMessageArea, 'Por favor, ingresa tu nombre de usuario y contraseña.', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${CLIENT_BASE_URL}/contratos/authenticate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({userName, password}),
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        localStorage.setItem('jwtToken', data.token);
+                        console.log('Inicio de sesión exitoso. Redirigiendo con token...');
+                        console.log('Token JWT:', data.token);
+
+                        // ¡CAMBIO CLAVE AQUÍ! Llama a la nueva función para pasar el token por URL
+                        redirectToProtectedPageWithToken(`${CLIENT_BASE_URL}/contratos/Index`, data.token);
+
+                    } else {
+                        showMessage(loginMessageArea, `Error al iniciar sesión: ${data.message || 'Credenciales inválidas'}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error al iniciar sesión:', error);
+                    showMessage(loginMessageArea, 'Error de conexión al iniciar sesión. Verifica que el backend esté funcionando.', 'error');
+                }
+            });
+
+            // Este script se ejecuta cuando la página se carga.
+            // Si hay un mensaje de error flash de Spring, Thymeleaf ya lo habrá renderizado.
+        </script>
+    </body>
+</html>
