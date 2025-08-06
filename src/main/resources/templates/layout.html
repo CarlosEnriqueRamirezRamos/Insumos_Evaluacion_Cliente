@@ -19,7 +19,7 @@
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 
         <!-- CSS personalizado -->
-        <link rel="stylesheet" th:href="@{/css/styles_Layout.css}">
+        <link rel="stylesheet" th:href="@{/css/styles.css}">
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
@@ -40,7 +40,7 @@
             </div>
         </nav>
         <div class="burger-menu" id="customSidebar">
-
+            
             <a class="menu-icon" th:href="@{/contratos/Usuarios}" title="Usuarios" sec:authorize="hasRole('ADMINISTRADOR')" id="menu-usuarios">
                 <i class="fas fa-user"></i>
                 <span>Usuarios</span>
@@ -70,70 +70,72 @@
         <div class="main-content" layout:fragment="content"></div>
 
         <!-- Scripts globales -->
+        <!-- IMPORTANTE: Cargar authenticatedFetch.js, jQuery, Bootstrap y DataTables primero y SIN 'defer' -->
+        <!-- Esto asegura que estén disponibles para los scripts en los fragmentos de Thymeleaf -->
+        <script src="/js/authenticatedFetch.js"></script> 
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.datatables.net/1.13.10/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/1.13.10/js/dataTables.bootstrap5.min.js"></script>
+        
 
-    <th:block layout:fragment="scripts">
+        <th:block layout:fragment="scripts">
+            <!-- Los scripts específicos de cada página se insertarán aquí -->
+            <!-- Asegúrate de que cualquier script aquí que use jQuery esté dentro de $(document).ready() -->
+            <script>
+                // Estas comprobaciones son más para depuración
+                if (typeof jQuery != 'undefined') {
+                    console.log('DEBUG: jQuery cargado correctamente en layout.html (global).');
+                } else {
+                    console.error('ERROR: jQuery NO cargado en layout.html (global).');
+                }
+                if (typeof bootstrap != 'undefined') {
+                    console.log('DEBUG: Bootstrap JS cargado correctamente en layout.html (global).');
+                } else {
+                    console.error('ERROR: Bootstrap JS NO cargado en layout.html (global).');
+                }
+            </script>
+        </th:block>
+
         <script>
-            if (typeof jQuery != 'undefined') {
-                console.log('DEBUG: jQuery cargado correctamente en layout.html (global).');
-            } else {
-                console.error('ERROR: jQuery NO cargado en layout.html (global).');
-            }
-            if (typeof bootstrap != 'undefined') {
-                console.log('DEBUG: Bootstrap JS cargado correctamente en layout.html (global).');
-            } else {
-                console.error('ERROR: Bootstrap JS NO cargado en layout.html (global).');
-            }
+            document.getElementById('logoutButton').addEventListener('click', function() {
+                localStorage.removeItem('jwtToken');
+                window.location.href = '/contratos'; // Redirige a la página de inicio de sesión o principal
+            });
+
+            // Este script principal del layout también se ejecuta después de que las librerías globales están cargadas
+            $(document).ready(function() {
+                const jwtToken = localStorage.getItem('jwtToken');
+                if (jwtToken) {
+                    // Configura jQuery para enviar el token en todas las solicitudes AJAX
+                    // Esto es útil para plugins como DataTables que usan jQuery.ajax
+                    $.ajaxSetup({
+                        beforeSend: function(xhr) {
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + jwtToken);
+                        }
+                    });
+                    console.log('DEBUG: Token JWT configurado para solicitudes AJAX de jQuery.');
+
+                } else {
+                    console.log('DEBUG: No se encontró token JWT en localStorage.');
+                    // Si no hay token, y la página es protegida, el backend debería redirigir.
+                    // Para evitar que los usuarios accedan a páginas protegidas sin token,
+                    // tu UsuarioController debe manejar la redirección si no hay token.
+                    // Opcional: Redirigir al login si no hay token y no estamos en la página de login
+                    if (!window.location.pathname.includes('/contratos') && !window.location.pathname.includes('/api/auth')) {
+                        window.location.href = '/contratos'; // O la ruta de tu página de login
+                    }
+                }
+
+                const burgerToggle = document.getElementById('burgerToggle');
+                const customSidebar = document.getElementById('customSidebar');
+                if (burgerToggle && customSidebar) {
+                    burgerToggle.addEventListener('click', function() {
+                        customSidebar.classList.toggle('active');
+                        document.body.classList.toggle('sidebar-open');
+                    });
+                }
+            });
         </script>
-    </th:block>
-
-    <script>
-        document.getElementById('logoutButton').addEventListener('click', function () {
-            localStorage.removeItem('jwtToken');
-            window.location.href = '/contratos';
-        });
-
-        $(document).ready(function () {
-            const jwtToken = localStorage.getItem('jwtToken');
-            if (jwtToken) {
-                // Configura jQuery para enviar el token en todas las solicitudes AJAX
-                $.ajaxSetup({
-                    beforeSend: function (xhr) {
-                        xhr.setRequestHeader('Authorization', 'Bearer ' + jwtToken);
-                    }
-                });
-                console.log('DEBUG: Token JWT configurado para solicitudes AJAX.');
-
-                // ¡NUEVO CÓDIGO AQUÍ! Añadir el token a los enlaces del menú
-                const menuLinks = document.querySelectorAll('.burger-menu a.menu-icon');
-                menuLinks.forEach(link => {
-                    let href = link.getAttribute('href');
-                    if (href && !href.includes('token=')) { // Evita añadirlo dos veces
-                        const separator = href.includes('?') ? '&' : '?';
-                        link.setAttribute('href', `${href}${separator}token=${jwtToken}`);
-                        console.log(`DEBUG: Enlace modificado: ${link.id} -> ${link.getAttribute('href')}`);
-                    }
-                });
-
-            } else {
-                console.log('DEBUG: No se encontró token JWT en localStorage.');
-                // Si no hay token, y la página es protegida, el backend debería redirigir.
-                // Para evitar que los usuarios accedan a páginas protegidas sin token,
-                // tu UsuarioController debe manejar la redirección si no hay token.
-            }
-
-            const burgerToggle = document.getElementById('burgerToggle');
-            const customSidebar = document.getElementById('customSidebar');
-            if (burgerToggle && customSidebar) {
-                burgerToggle.addEventListener('click', function () {
-                    customSidebar.classList.toggle('active');
-                    document.body.classList.toggle('sidebar-open');
-                });
-            }
-        });
-    </script>
-</body>
+    </body>
 </html>

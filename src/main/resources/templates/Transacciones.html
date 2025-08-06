@@ -10,7 +10,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" th:href="@{/css/styles.css}">
-        
+
     </head>
 
     <th:block layout:fragment="content">
@@ -41,195 +41,253 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="transaccion : ${listaTransacciones}">
-                            <!-- ¡Esta es la capitalización correcta según tu ML.Transaccion! -->
-                            <td th:text="${transaccion.idTransaccion}">-</td>
-                            <td th:text="${transaccion.nombreUsuario}">-</td>
-                            <td th:text="${transaccion.claveContrato}">-</td>
-                            <td th:text="${transaccion.fechaRegistro != null ? #dates.format(transaccion.fechaRegistro, 'dd/MM/yyyy') : 'N/A'}">-</td>
-                            <td th:text="${transaccion.claveNodoRecepcion}">-</td>
-                            <td th:text="${transaccion.descNodoRecepcion}">-</td>
-                            <td th:text="${transaccion.claveNodoEntrega}">-</td>
-                            <td th:text="${transaccion.descNodoEntrega}">-</td>
-                            <td th:text="${transaccion.zonaInyeccion}">-</td>
-                            <td th:text="${transaccion.zonaExtraccion}">-</td>
-                            <td>
-                                <button type="button" class="btn btn-info btn-sm"
-                                        th:attr="
-                                        data-id=${transaccion.idTransaccion},
-                                        data-nominada-recepcion=${transaccion.nominadaRecepcion != null ? #numbers.formatDecimal(transaccion.nominadaRecepcion, 1, 2) : 'N/A'},
-                                        data-asignada-recepcion=${transaccion.asignadaRecepcion != null ? #numbers.formatDecimal(transaccion.asignadaRecepcion, 1, 2) : 'N/A'},
-                                        data-nominada-entrega=${transaccion.nominadaEntrega != null ? #numbers.formatDecimal(transaccion.nominadaEntrega, 1, 2) : 'N/A'},
-                                        data-asignada-entrega=${transaccion.asignadaEntrega != null ? #numbers.formatDecimal(transaccion.asignadaEntrega, 1, 2) : 'N/A'},
-                                        data-exceso-firme=${transaccion.excesoFirme != null ? #numbers.formatDecimal(transaccion.excesoFirme, 1, 2) : 'N/A'},
-                                        data-uso-interrumpible=${transaccion.usoInterrumpible != null ? #numbers.formatDecimal(transaccion.usoInterrumpible, 1, 2) : 'N/A'},
-                                        data-gas-exceso=${transaccion.gasExceso != null ? #numbers.formatDecimal(transaccion.gasExceso, 1, 2) : 'N/A'},
-                                        data-cargo-uso=${transaccion.cargoUso != null ? #numbers.formatDecimal(transaccion.cargoUso, 1, 2) : 'N/A'},
-                                        data-cargo-gas=${transaccion.cargoGasExceso != null ? #numbers.formatDecimal(transaccion.cargoGasExceso, 1, 2) : 'N/A'},
-                                        data-total-factura=${transaccion.facturaTotal != null ? #numbers.formatDecimal(transaccion.facturaTotal, 1, 2) : 'N/A'}
-                                        "
-                                        onclick="mostrarDetallesFactura(this)">
-                                    Info
-                                </button>
-                            </td>
-                        </tr>
+                        <!-- ¡IMPORTANTE! Se eliminó la fila de "Cargando transacciones..." del tbody.
+                             DataTables espera un tbody vacío o con el número correcto de celdas por fila. -->
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Modal de Detalles -->
-        <div class="modal fade animate__animated animate__fadeInDown modal-advanced" id="detalleFacturaModal" tabindex="-1" aria-hidden="true">
+        <!-- Modal de detalles de la factura -->
+        <div class="modal fade modal-advanced" id="detalleFacturaModal" tabindex="-1" aria-labelledby="detalleFacturaModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
+                <div class="modal-content animate__animated">
                     <div class="modal-header">
-                        <h1 class="modal-title">Detalle Factura #<span id="facturaId"></span></h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        <h5 class="modal-title" id="detalleFacturaModalLabel">Detalle de Factura</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <table class="modal-table">
+                            <thead>
+                                <tr class="d-none"><th>Descripción</th><th>Valor</th></tr>
+                            </thead>
                             <tbody>
-                                <tr><th>Nominada Recepción</th><td id="NominadaRecepcion">N/A</td></tr>
-                                <tr><th>Asignada Recepción</th><td id="AsignadaRecepcion">N/A</td></tr>
-                                <tr><th>Nominada Entregada</th><td id="NominadaEntrega">N/A</td></tr>
-                                <tr><th>Asignada Entregada</th><td id="AsignadaEntrega">N/A</td></tr>
-                                <tr><th>Exceso Firme</th><td id="ExcesoFirme">N/A</td></tr>
-                                <tr><th>Uso Interrumpible</th><td id="UsoInterrumpible">N/A</td></tr>
-                                <tr><th>Gas Exceso</th><td id="GasExceso">N/A</td></tr>
-                                <tr><th>Cargo Uso</th><td id="CargoUso">N/A</td></tr>
-                                <tr><th>Cargo Exceso</th><td id="CargoGasExceso">N/A</td></tr>
-                                <tr class="total-row"><th>Total Factura</th><td id="TotalFactura">N/A</td></tr>
+                                <tr><th>Nominada Recepción</th><td><span class="value" id="modal-nominada-recepcion"></span></td></tr>
+                                <tr><th>Asignada Recepción</th><td><span class="value" id="modal-asignada-recepcion"></span></td></tr>
+                                <tr><th>Nominada Entrega</th><td><span class="value" id="modal-nominada-entrega"></span></td></tr>
+                                <tr><th>Asignada Entrega</th><td><span class="value" id="modal-asignada-entrega"></span></td></tr>
+                                <tr><th>Exceso Firme</th><td><span class="value" id="modal-exceso-firme"></span></td></tr>
+                                <tr><th>Uso Interrumpible</th><td><span class="value" id="modal-uso-interrumpible"></span></td></tr>
+                                <tr><th>Gas Exceso</th><td><span class="value" id="modal-gas-exceso"></span></td></tr>
+                                <tr><th>Cargo Uso</th><td><span class="value" id="modal-cargo-uso"></span></td></tr>
+                                <tr><th>Cargo Gas Exceso</th><td><span class="value" id="modal-cargo-gas"></span></td></tr>
+                                <tr class="total-row">
+                                    <th>Total Factura</th>
+                                    <td><span class="value total-factura" id="modal-total-factura"></span></td>
+                                </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-close-modal" data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>
         </div>
     </th:block>
 
-    <!-- Fragmento de scripts -->
     <th:block layout:fragment="scripts">
-        <!-- DataTables JS (Cargar la librería principal primero) -->
-        <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-        <!-- DataTables JS (versión combinada para Bootstrap 5, ahora después de la librería principal) -->
-        <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
-
         <script>
-                                            console.log('DEBUG: Script de Transacciones.html cargado.');
+            console.log('DEBUG: Script de Transacciones.html cargado.');
 
-                                            let detalleFacturaModal = null;
-                                            let isClosing = false;
+            let detalleFacturaModalInstance = null; // Renombrado para evitar conflicto
+            let isClosing = false;
 
-                                            function mostrarDetallesFactura(button) {
-                                                console.log('DEBUG: Función mostrarDetallesFactura() llamada.');
-                                                if (isClosing)
-                                                    return;
+            // Helper function to format numbers or return 'N/A'
+            function formatNumber(value) {
+                // Check if the value is a number and not null
+                if (typeof value === 'number' && value !== null) {
+                    return value.toFixed(2);
+                }
+                return 'N/A';
+            }
 
-                                                const transaccion = {
-                                                    id: button.getAttribute('data-id'),
-                                                    nominadaRecepcion: button.getAttribute('data-nominada-recepcion'),
-                                                    asignadaRecepcion: button.getAttribute('data-asignada-recepcion'),
-                                                    nominadaEntrega: button.getAttribute('data-nominada-entrega'),
-                                                    asignadaEntrega: button.getAttribute('data-asignada-entrega'),
-                                                    excesoFirme: button.getAttribute('data-exceso-firme'),
-                                                    usoInterrumpible: button.getAttribute('data-uso-interrumpible'),
-                                                    gasExceso: button.getAttribute('data-gas-exceso'),
-                                                    cargoUso: button.getAttribute('data-cargo-uso'),
-                                                    cargoGasExceso: button.getAttribute('data-cargo-gas'),
-                                                    totalFactura: button.getAttribute('data-total-factura')
-                                                };
+            // Función global para mostrar detalles de factura
+            window.mostrarDetallesFactura = function (button) {
+                console.log('DEBUG: Función mostrarDetallesFactura() llamada.');
+                if (isClosing)
+                    return;
 
-                                                // Actualizar modal con los datos
-                                                document.getElementById('facturaId').textContent = transaccion.id;
-                                                document.getElementById('NominadaRecepcion').textContent = transaccion.nominadaRecepcion;
-                                                document.getElementById('AsignadaRecepcion').textContent = transaccion.asignadaRecepcion;
-                                                document.getElementById('NominadaEntrega').textContent = transaccion.nominadaEntrega;
-                                                document.getElementById('AsignadaEntrega').textContent = transaccion.asignadaEntrega;
-                                                document.getElementById('ExcesoFirme').textContent = transaccion.excesoFirme;
-                                                document.getElementById('UsoInterrumpible').textContent = transaccion.usoInterrumpible;
-                                                document.getElementById('GasExceso').textContent = transaccion.gasExceso;
-                                                document.getElementById('CargoUso').textContent = transaccion.cargoUso;
-                                                document.getElementById('CargoGasExceso').textContent = transaccion.cargoGasExceso;
-                                                document.getElementById('TotalFactura').textContent = transaccion.totalFactura;
+                const transaccion = {
+                    id: button.getAttribute('data-id'),
+                    // --- CORRECCIÓN AQUÍ: Acceso directo a los atributos data- ---
+                    nominadaRecepcion: button.getAttribute('data-nominada-recepcion'),
+                    asignadaRecepcion: button.getAttribute('data-asignada-recepcion'),
+                    nominadaEntrega: button.getAttribute('data-nominada-entrega'),
+                    asignadaEntrega: button.getAttribute('data-asignada-entrega'),
+                    excesoFirme: button.getAttribute('data-exceso-firme'),
+                    usoInterrumpible: button.getAttribute('data-uso-interrumpible'),
+                    gasExceso: button.getAttribute('data-gas-exceso'),
+                    cargoUso: button.getAttribute('data-cargo-uso'),
+                    cargoGasExceso: button.getAttribute('data-cargo-gas'),
+                    totalFactura: button.getAttribute('data-total-factura')
+                };
 
-                                                const modalElement = document.getElementById('detalleFacturaModal');
-                                                const modalBody = modalElement.querySelector('.modal-dialog');
+                // Actualizar modal con los datos
+                document.getElementById('detalleFacturaModalLabel').textContent = `Detalle de Factura - ID: ${transaccion.id}`;
+                document.getElementById('modal-nominada-recepcion').textContent = transaccion.nominadaRecepcion;
+                document.getElementById('modal-asignada-recepcion').textContent = transaccion.asignadaRecepcion;
+                document.getElementById('modal-nominada-entrega').textContent = transaccion.nominadaEntrega;
+                document.getElementById('modal-asignada-entrega').textContent = transaccion.asignadaEntrega;
+                document.getElementById('modal-exceso-firme').textContent = transaccion.excesoFirme;
+                document.getElementById('modal-uso-interrumpible').textContent = transaccion.usoInterrumpible;
+                document.getElementById('modal-gas-exceso').textContent = transaccion.gasExceso;
+                document.getElementById('modal-cargo-uso').textContent = transaccion.cargoUso;
+                document.getElementById('modal-cargo-gas').textContent = transaccion.cargoGasExceso;
+                document.getElementById('modal-total-factura').textContent = transaccion.totalFactura;
 
-                                                // Configurar animación
-                                                modalBody.classList.remove('animate__fadeOutDown', 'animate__animated');
-                                                modalBody.classList.add('animate__animated', 'animate__fadeInUp');
+                const modalElement = document.getElementById('detalleFacturaModal');
+                const modalDialog = modalElement.querySelector('.modal-content');
 
-                                                // Mostrar modal
-                                                // Verificar si bootstrap.Modal está definido
-                                                if (typeof bootstrap !== 'undefined' && typeof bootstrap.Modal !== 'undefined') {
-                                                    detalleFacturaModal = new bootstrap.Modal(modalElement);
-                                                    detalleFacturaModal.show();
-                                                    console.log('DEBUG: Modal de Bootstrap mostrado.');
-                                                } else {
-                                                    console.error('ERROR: bootstrap.Modal no está definido. Bootstrap JS no cargado correctamente.');
-                                                }
-                                            }
+                // Configurar animación
+                modalDialog.classList.remove('animate__fadeOutDown', 'animate__animated');
+                modalDialog.classList.add('animate__animated', 'animate__fadeInUp');
 
-                                            // Usar $(document).ready() para asegurar que jQuery y sus plugins estén listos
-                                            $(document).ready(function () {
-                                                console.log('DEBUG: $(document).ready() disparado en Transacciones.html.');
+                // Mostrar modal
+                if (typeof bootstrap !== 'undefined' && typeof bootstrap.Modal !== 'undefined') {
+                    detalleFacturaModalInstance = new bootstrap.Modal(modalElement);
+                    detalleFacturaModalInstance.show();
+                    console.log('DEBUG: Modal de Bootstrap mostrado.');
+                } else {
+                    console.error('ERROR: bootstrap.Modal no está definido. Bootstrap JS no cargado correctamente.');
+                }
+            };
 
-                                                // Verificar si jQuery está definido (redundante con $(document).ready() pero útil para depuración)
-                                                if (typeof jQuery !== 'undefined') {
-                                                    console.log('DEBUG: jQuery está cargado (dentro de ready).');
-                                                    // Inicializar DataTable
-                                                    $('#transaccionesTable').DataTable({
-                                                        responsive: true,
-                                                        dom: '<"top"lf>rt<"bottom"ip>',
-                                                        language: {
-                                                            url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json"
-                                                        },
-                                                        scrollX: true,
-                                                        paging: true,
-                                                        pageLength: 7,
-                                                        lengthMenu: [5, 7, 10, 15, 20, 25],
-                                                        columnDefs: [{
-                                                                targets: '_all',
-                                                                className: 'dt-head-center'
-                                                            }],
-                                                        initComplete: function () {
-                                                            $('.group-header').css('display', 'table-row');
-                                                            console.log('DEBUG: DataTable inicializado.');
-                                                        }
-                                                    });
-                                                } else {
-                                                    console.error('ERROR: jQuery no está cargado. DataTables no se inicializará.');
-                                                }
+            $(document).ready(function () {
+                console.log('DEBUG: $(document).ready() disparado en Transacciones.html.');
 
-                                                const modalElement = document.getElementById('detalleFacturaModal');
-                                                const modalBody = modalElement.querySelector('.modal-dialog');
+                var dataTableInstance = null; // Variable para la instancia de DataTable
 
-                                                // Manejar cierre del modal con animación
-                                                modalElement.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
-                                                    btn.addEventListener('click', function (e) {
-                                                        e.preventDefault();
-                                                        if (isClosing)
-                                                            return;
+                if (typeof jQuery !== 'undefined') {
+                    console.log('DEBUG: jQuery está cargado (dentro de ready).');
+                    // Inicializar DataTable
+                    dataTableInstance = $('#transaccionesTable').DataTable({
+                        responsive: true,
+                        dom: '<"top"lf>rt<"bottom"ip>',
+                        language: {
+                            url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json"
+                        },
+                        scrollX: true,
+                        paging: true,
+                        pageLength: 7,
+                        lengthMenu: [5, 7, 10, 15, 20, 25],
+                        columnDefs: [{
+                                targets: '_all',
+                                className: 'dt-head-center'
+                            }],
+                        // Definición de columnas para DataTable, coincidiendo con la API
+                        columns: [
+                            {"data": "idTransaccion"},
+                            {"data": "nombreUsuario"},
+                            {"data": "claveContrato"},
+                            {"data": "fechaRegistro",
+                                "render": function (data) {
+                                    return data ? new Date(data).toLocaleDateString('es-ES') : 'N/A';
+                                }
+                            },
+                            {"data": "claveNodoRecepcion"},
+                            {"data": "descNodoRecepcion"},
+                            {"data": "claveNodoEntrega"},
+                            {"data": "descNodoEntrega"},
+                            {"data": "zonaInyeccion"},
+                            {"data": "zonaExtraccion"},
+                            {// Columna de botón para detalles de factura
+                                "data": null,
+                                "render": function (data, type, row) {
+                                    // Pasa todos los datos necesarios al botón para el modal
+                                    // --- ¡CORRECCIÓN AQUÍ! Acceso directo a las propiedades de 'row' ---
+                                    const nominadaRecepcion = formatNumber(row.nominadaRecepcion);
+                                    const asignadaRecepcion = formatNumber(row.asignadaRecepcion);
+                                    const nominadaEntrega = formatNumber(row.nominadaEntrega);
+                                    const asignadaEntrega = formatNumber(row.asignadaEntrega);
+                                    const excesoFirme = formatNumber(row.excesoFirme);
+                                    const usoInterrumpible = formatNumber(row.usoInterrumpible);
+                                    const gasExceso = formatNumber(row.gasExceso);
+                                    const cargoUso = formatNumber(row.cargoUso);
+                                    const cargoGasExceso = formatNumber(row.cargoGasExceso);
+                                    const facturaTotal = formatNumber(row.facturaTotal);
+                                    // --- FIN DE CORRECCIÓN ---
 
-                                                        isClosing = true;
-                                                        modalBody.classList.remove('animate__fadeInUp');
-                                                        modalBody.classList.add('animate__fadeOutDown');
+                                    return `<button type="button" class="btn btn-info btn-sm"
+                                            data-id="${row.idTransaccion}"
+                                            data-nominada-recepcion="${nominadaRecepcion}"
+                                            data-asignada-recepcion="${asignadaRecepcion}"
+                                            data-nominada-entrega="${nominadaEntrega}"
+                                            data-asignada-entrega="${asignadaEntrega}"
+                                            data-exceso-firme="${excesoFirme}"
+                                            data-uso-interrumpible="${usoInterrumpible}"
+                                            data-gas-exceso="${gasExceso}"
+                                            data-cargo-uso="${cargoUso}"
+                                            data-cargo-gas="${cargoGasExceso}"
+                                            data-total-factura="${facturaTotal}"
+                                            onclick="mostrarDetallesFactura(this)"> Info </button>`;
+                                }
+                            }
+                        ]
+                    });
+                    console.log('DEBUG: DataTable inicializado.');
 
-                                                        setTimeout(() => {
-                                                            if (detalleFacturaModal) {
-                                                                detalleFacturaModal.hide();
-                                                            } else {
-                                                                modalElement.style.display = 'none';
-                                                                modalElement.classList.remove('show');
-                                                                modalElement.setAttribute('aria-hidden', 'true');
-                                                            }
-                                                            modalBody.classList.remove('animate__animated', 'animate__fadeOutDown');
-                                                            isClosing = false;
-                                                            console.log('DEBUG: Modal cerrado con animación.');
-                                                        }, 800);
-                                                    });
-                                                });
-                                            });
+                    // --- Lógica para cargar las transacciones desde la API con JWT ---
+                    async function fetchAndRenderTransacciones() {
+                        try {
+                            const response = await authenticatedFetch('/Api/Transacciones');
+                            const result = await response.json(); // El backend devuelve un objeto Result
+
+                            if (result.correct && Array.isArray(result.object)) {
+                                console.log('DEBUG: Transacciones recibidas:', result.object);
+                                // Limpiar la tabla y añadir los nuevos datos
+                                dataTableInstance.clear().rows.add(result.object).draw();
+                            } else {
+                                console.error('ERROR: No se pudieron obtener las transacciones o formato incorrecto:', result.errorMessage || 'Error desconocido', result);
+                                // Mostrar un mensaje de error en la tabla
+                                $('#transaccionesTable tbody').html('<tr><td colspan="11" class="text-center text-danger">Error al cargar las transacciones o formato de datos incorrecto.</td></tr>');
+                            }
+                        } catch (error) {
+                            console.error('ERROR: Fallo en la llamada a la API de transacciones:', error);
+                            // Mostrar un mensaje de error de conexión en la tabla
+                            $('#transaccionesTable tbody').html('<tr><td colspan="11" class="text-center text-danger">Error de conexión con el servidor.</td></tr>');
+                            // authenticatedFetch ya maneja la redirección para 401/403
+                        }
+                    }
+
+                    // Llamar a la función para obtener los datos al cargar la página
+                    fetchAndRenderTransacciones();
+
+                } else {
+                    console.error('ERROR: jQuery no está cargado. DataTables no se inicializará.');
+                    // Mostrar un mensaje de error si jQuery no está cargado
+                    $('#transaccionesTable tbody').html('<tr><td colspan="11" class="text-center text-danger">Error: jQuery no está cargado. La tabla no se inicializará.</td></tr>');
+                }
+
+                const modalElement = document.getElementById('detalleFacturaModal');
+                const modalDialog = modalElement.querySelector('.modal-content');
+
+                // Manejar cierre del modal con animación
+                modalElement.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        if (isClosing)
+                            return;
+
+                        isClosing = true;
+                        modalDialog.classList.remove('animate__fadeInUp');
+                        modalDialog.classList.add('animate__fadeOutDown');
+
+                        setTimeout(() => {
+                            if (detalleFacturaModalInstance) {
+                                detalleFacturaModalInstance.hide();
+                            } else {
+                                modalElement.style.display = 'none';
+                                modalElement.classList.remove('show');
+                                modalElement.setAttribute('aria-hidden', 'true');
+                            }   
+                            modalDialog.classList.remove('animate__animated', 'animate__fadeOutDown');
+                            isClosing = false;
+                            console.log('DEBUG: Modal cerrado con animación.');
+                        }, 800); // Coincide con la duración de la animación en CSS
+                    });
+                });
+            });
         </script>
     </th:block>
 </html>

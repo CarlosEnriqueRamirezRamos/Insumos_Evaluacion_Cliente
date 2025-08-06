@@ -54,7 +54,7 @@
 
         <script>
             // Define la URL base del backend.
-            const CLIENT_BASE_URL = 'http://localhost:8080';
+            const CLIENT_BASE_URL = 'http://localhost:8080'; // Asegúrate que este puerto sea el de tu frontend
 
             document.addEventListener('DOMContentLoaded', function () {
                 const registerForm = document.getElementById('register-form');
@@ -96,6 +96,7 @@
                         }
 
                         try {
+                            // La URL del backend para registro
                             const response = await fetch(`${CLIENT_BASE_URL}/contratos/register`, {
                                 method: 'POST',
                                 headers: {
@@ -112,8 +113,7 @@
                                 console.log('Registro exitoso. Redirigiendo con token:', data.token);
 
                                 // Redirigir a la página principal o a la que corresponda, pasando el token
-                                window.location.href = `http://localhost:8080/contratos`;
-
+                                window.location.href = `http://localhost:8080/contratos`; // Asegúrate que esta es la página de inicio protegida
                             } else {
                                 showMessage(registerMessageArea, `Error en el registro: ${data.message || 'Error desconocido'}`, 'error');
                             }

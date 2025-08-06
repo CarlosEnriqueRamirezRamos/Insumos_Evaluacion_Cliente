@@ -3,8 +3,8 @@ package com.Insumos.Cliente.Insumos_Evaluacion_Cliente.ML;
 public class Usuario {
     private int idUsuario;
     private String nombre;
-    private String userName; // <-- ¡Asegúrate de que exista este campo!
-    private Rol rol;        // <-- ¡Asegúrate de que exista este campo y su getter!
+    private String username;
+    private Rol rol;        
     private int status;
 
     // Constructor vacío (necesario para Spring/Jackson)
@@ -28,12 +28,12 @@ public class Usuario {
         this.nombre = nombre;
     }
 
-    public String getUserName() { // <-- ¡Getter para userName!
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public Rol getRol() { // <-- ¡Getter para Rol!

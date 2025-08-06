@@ -19,66 +19,111 @@
                 <h2 class="mb-4 text-center">Detalle De los contratos del cliente</h2>
 
                 <div class="table-responsive">
-                    <table id="transaccionesTable" class="table table-striped table-hover w-100">
+                    <table id="contratosTable" class="table table-striped table-hover w-100">
                         <thead class="table-dark">
                             <tr>
                                 <th>ID Contrato</th>
                                 <th>Clave</th>
+                                <th>Usuario</th>
+                                <!-- Agrega más encabezados según tu modelo de Contrato -->
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="contrato : ${contratos}">
-                                <td th:text="${contrato.idContrato}"></td>
-                                <td th:text="${contrato.claveContrato}"></td>
-                                <!-- Agrega más celdas según tu modelo -->
-                            </tr>
+                            <!-- Los datos se cargarán dinámicamente con JavaScript -->
+                            <tr><td colspan="3" class="text-center">Cargando contratos...</td></tr>
                         </tbody>
                     </table>
-                    <!-- Mensaje cuando no hay contratos -->
-                    <div th:if="${contratos != null and contratos.empty}" class="alert alert-info">
-                        No se encontraron contratos para este usuario.
-                    </div>
                 </div>
             </div>
         </div>
 
-
         <!-- Fragmento de scripts -->
     <th:block layout:fragment="scripts">
-        <!-- jQuery -->
-        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-        <!-- Bootstrap Bundle -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- DataTables -->
-        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-        <!-- Bootstrap Icons -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+        <script>
+            console.log('DEBUG: Script de Contratos.html cargado.');
 
-        <!-- Configuración avanzada de DataTables -->
-        <script th:inline="javascript">
             $(document).ready(function () {
-                const table = $('#transaccionesTable').DataTable({
-                    language: {
-                        url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json'
-                    },
-                    responsive: true,
-                    dom: '<"top"<"row"<"col-md-6"l><"col-md-6"f>>>rt<"bottom"<"row"<"col-md-6"i><"col-md-6"p>>>',
-                    pageLength: 10,
-                    lengthMenu: [5, 10, 25, 50, 100],
-                    initComplete: function () {
-                        // Personalizar el buscador
-                        $('#searchInput').on('keyup', function () {
-                            table.search(this.value).draw();
-                        });
-                    },
-                    columnDefs: [
-                        {
-                            targets: '_all', // Aplica a todas las columnas
-                            className: 'dt-head-center' // Centra los encabezados
+                console.log('DEBUG: $(document).ready() disparado en Contratos.html.');
+
+                var dataTableInstance = null; // Variable para la instancia de DataTable
+
+                if (typeof jQuery !== 'undefined') {
+                    console.log('DEBUG: jQuery está cargado (dentro de ready).');
+                    // Inicializar DataTable
+                    dataTableInstance = $('#contratosTable').DataTable({
+                        language: {
+                            url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json'
+                        },
+                        responsive: true,
+                        dom: '<"top"<"row"<"col-md-6"l><"col-md-6"f>>>rt<"bottom"<"row"<"col-md-6"i><"col-md-6"p>>>',
+                        pageLength: 10,
+                        lengthMenu: [5, 10, 25, 50, 100],
+                        columnDefs: [
+                            {
+                                targets: '_all', // Aplica a todas las columnas
+                                className: 'dt-head-center' // Centra los encabezados
+                            }
+                        ],
+                        // Definición de columnas para DataTable, coincidiendo con la API
+                        columns: [
+                            { "data": "idContrato" },
+                            { "data": "claveContrato" },
+                            { "data": "usuario.nombre" } // Asumiendo que el objeto usuario tiene la propiedad 'nombre'
+                            // Agrega más definiciones de columnas según tu modelo de Contrato
+                        ],
+                        initComplete: function () {
+                            console.log('DEBUG: DataTable de Contratos inicializado.');
+                            // Personalizar el buscador
+                            $('#searchInput').on('keyup', function () {
+                                dataTableInstance.search(this.value).draw();
+                            });
                         }
-                    ]
-                });
+                    });
+                    
+                    // --- Lógica para cargar los contratos desde la API con JWT ---
+                    async function fetchAndRenderContratos() {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const idUsuario = urlParams.get('idUsuario'); // Si el ID viene en la URL como /contratos?idUsuario=X
+
+                        let apiUrl = '/api/Contratos'; // Endpoint general si no hay ID de usuario
+
+                        // Si el ID de usuario está en la URL, usa el endpoint específico
+                        if (idUsuario) {
+                            apiUrl = `/api/Contratos/${idUsuario}`;
+                        } else {
+                            // Si no hay ID de usuario en la URL, se asume que se deben cargar todos los contratos
+                            // O puedes decidir no cargar nada o mostrar un mensaje.
+                            console.warn('ADVERTENCIA: No se proporcionó idUsuario en la URL. Intentando cargar todos los contratos si el endpoint lo permite.');
+                            // Aquí podrías llamar a un endpoint que devuelva todos los contratos si existe,
+                            // o simplemente dejar la tabla vacía. Para este ejemplo, asumimos que /api/Contratos
+                            // sin ID es válido o que el ID siempre se pasará.
+                            // Por ejemplo: apiUrl = '/api/AllContratos'; // Si tu backend tiene un endpoint para todos los contratos sin ID, úsalo aquí.
+                        }
+
+                        try {
+                            const response = await authenticatedFetch(apiUrl);
+                            const result = await response.json(); // El backend devuelve un objeto Result
+
+                            if (result.correct && Array.isArray(result.object)) {
+                                console.log('DEBUG: Contratos recibidos:', result.object);
+                                dataTableInstance.clear().rows.add(result.object).draw();
+                            } else {
+                                console.error('ERROR: No se pudieron obtener los contratos o formato incorrecto:', result.errorMessage || 'Error desconocido', result);
+                                $('#contratosTable tbody').html('<tr><td colspan="3" class="text-center text-danger">Error al cargar los contratos o formato de datos incorrecto.</td></tr>');
+                            }
+                        } catch (error) {
+                            console.error('ERROR: Fallo en la llamada a la API de contratos:', error);
+                            $('#contratosTable tbody').html('<tr><td colspan="3" class="text-center text-danger">Error de conexión con el servidor.</td></tr>');
+                            // authenticatedFetch ya maneja la redirección para 401/403
+                        }
+                    }
+
+                    // Llamar a la función para obtener los datos al cargar la página
+                    fetchAndRenderContratos();
+
+                } else {
+                    console.error('ERROR: jQuery no está cargado. DataTables de Contratos no se inicializará.');
+                }
             });
         </script>
     </th:block>

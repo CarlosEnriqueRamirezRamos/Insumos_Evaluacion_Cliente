@@ -4,11 +4,11 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout}">
     <head>
-        <title>Gestión de Usuarios</title> <!-- Título más descriptivo -->
+        <title>Gestión de Usuarios</title>
         <!-- Bootstrap CSS (se carga desde layout.html, pero mantener por si acaso) -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
         <!-- DataTables CSS (se carga desde layout.html) -->
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.10/css/dataTables.bootstrap5.min.css">
         <!-- Animate.css -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
         <!-- Google Fonts -->
@@ -26,10 +26,10 @@
         <!-- Contenido principal -->
         <div layout:fragment="content">
             <div class="container-fluid mt-5">
-                <h2 class="mb-4 text-center">Gestión de Usuarios</h2>
+                <h2 class="mb-4 text-center text-white">Gestión de Usuarios</h2>
 
                 <div class="table-responsive">
-                    <table id="usuariosTable" class="table table-bordered table-striped table-hover table-details w-100">
+                    <table id="usuariosTable" class="table table-bordered table-striped table-hover w-100">
                         <thead class="table-dark">
                             <tr>
                                 <th>ID</th>
@@ -41,34 +41,43 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <!-- Las filas serán renderizadas por Thymeleaf -->
                             <tr th:each="usuario : ${listaUsuarios}">
                                 <td th:text="${usuario.idUsuario}">-</td>
                                 <td th:text="${usuario.nombre}">-</td>
-                                <td th:text="${usuario.userName}">-</td>
+                                <td th:text="${usuario.username}">-</td>
                                 <td th:text="${usuario.rol != null ? usuario.rol.rol : 'N/A'}">-</td> <!-- Asumiendo que Rol tiene una propiedad 'rol' -->
                                 <td th:text="${usuario.status == 1 ? 'Activo' : 'Inactivo'}">-</td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group">
                                         <a th:href="@{'/contratos/Contratos/' + ${usuario.idUsuario}}"
                                            class="btn btn-sm btn-primary me-2">
-                                            <!-- Icono de Font Awesome para Contratos -->
                                             <i class="fas fa-file-contract"></i> Contratos
                                         </a>
-                                        <a th:href="@{/usuarios/{id}/editar(id=${usuario.idUsuario})}" 
+                                        <a th:href="@{/usuarios/{id}/editar(id=${usuario.idUsuario})}"
                                            class="btn btn-sm btn-warning me-2">
-                                            <!-- Icono de Font Awesome para Editar -->
                                             <i class="fas fa-edit"></i> Editar
                                         </a>
-                                        <a th:href="@{/usuarios/{id}/eliminar(id=${usuario.idUsuario})}" 
+                                        <a th:href="@{/usuarios/{id}/eliminar(id=${usuario.idUsuario})}"
                                            class="btn btn-sm btn-danger">
-                                            <!-- Icono de Font Awesome para Eliminar -->
                                             <i class="fas fa-trash-alt"></i> Eliminar
                                         </a>
                                     </div>
                                 </td>
                             </tr>
+                            <!-- NOTA: La fila de "empty-state" se ha movido fuera del tbody para evitar conflictos con DataTables -->
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Mensaje de estado vacío, solo se muestra si no hay usuarios -->
+                <div th:if="${listaUsuarios == null or listaUsuarios.isEmpty()}" class="empty-state">
+                    <i class="bi bi-people"></i>
+                    <h4>No hay usuarios registrados</h4>
+                    <p>Comienza agregando un nuevo usuario</p>
+                    <a class="btn btn-add text-white mt-3" th:href="@{/Usuario/Form/0}">
+                        <i class="bi bi-person-add me-2"></i> Agregar primer usuario
+                    </a>
                 </div>
             </div>
         </div>
@@ -79,8 +88,8 @@
         <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
         <!-- DataTables JS (versión combinada para Bootstrap 5, ahora después de la librería principal) -->
         <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
-        
-        <!-- Configuración avanzada de DataTables -->
+
+        <!-- Script para inicializar DataTables y la función updateStatus -->
         <script th:inline="javascript">
             console.log('DEBUG: Script de Usuarios.html cargado.');
 
@@ -89,7 +98,8 @@
 
                 if (typeof jQuery !== 'undefined') {
                     console.log('DEBUG: jQuery está cargado (dentro de ready).');
-                    const table = $('#usuariosTable').DataTable({ // Cambiado a #usuariosTable
+                    // Inicializar DataTable sobre la tabla ya renderizada por Thymeleaf
+                    const table = $('#usuariosTable').DataTable({
                         language: {
                             url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json'
                         },
@@ -98,20 +108,63 @@
                         pageLength: 10,
                         lengthMenu: [5, 10, 25, 50, 100],
                         columnDefs: [
-                            { targets: [5], orderable: false, searchable: false } // Columna de Acciones (índice 5)
+                            {targets: [5], orderable: false, searchable: false} // Columna de Acciones (índice 5)
                         ],
                         initComplete: function () {
                             console.log('DEBUG: DataTable de Usuarios inicializado.');
-                            // Si tienes un buscador personalizado fuera de DataTables, aquí lo enlazarías
-                            // $('#searchInput').on('keyup', function () {
-                            //     table.search(this.value).draw();
-                            // });
                         }
                     });
                 } else {
                     console.error('ERROR: jQuery no está cargado. DataTables de Usuarios no se inicializará.');
                 }
             });
+
+            // Función para actualizar el estado del usuario vía AJAX
+            // Esta función se mantiene si planeas usarla para un checkbox de estado,
+            // pero necesitarás un controlador en el backend para /Usuario/UpdateStatus.
+            function updateStatus(checkbox) {
+                let userId = $(checkbox).data('idusuario');
+                let newStatus = $(checkbox).is(':checked') ? 1 : 0;
+
+                // Obtén el token CSRF desde los meta tags en el HTML
+                let csrfToken = $('meta[name="_csrf"]').attr('content');
+                let csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+
+                console.log(`DEBUG: Intentando actualizar usuario ${userId} a estado ${newStatus}`);
+
+                $.ajax({
+                    type: "POST", // O PUT, dependiendo de tu backend
+                    url: "/Usuario/UpdateStatus", // Asegúrate de que esta URL sea correcta en tu backend
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        idUsuario: userId,
+                        status: newStatus
+                    }),
+                    beforeSend: function (xhr) {
+                        // Añade el header CSRF a la petición
+                        xhr.setRequestHeader(csrfHeader, csrfToken);
+                    },
+                    success: function (response) {
+                        if (!response.correct) {
+                            // Si el backend indica un error, revierte el checkbox
+                            $(checkbox).prop('checked', !$(checkbox).is(':checked'));
+                            // Usar una modal en lugar de alert
+                            alert(response.error); // Considera reemplazar esto con una modal personalizada
+                        } else {
+                            console.log(`DEBUG: Estado del usuario ${userId} actualizado a ${newStatus} correctamente.`);
+                        }
+                    },
+                    complete: function () {
+                        $(checkbox).prop('disabled', false); // Habilita el checkbox de nuevo
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        $(checkbox).prop('checked', !$(checkbox).is(':checked')); // Revierte el checkbox en error de conexión
+                        console.error("ERROR: Error de conexión o del servidor al actualizar estado:", textStatus, errorThrown, jqXHR);
+                        // Usar una modal en lugar de alert
+                        alert("Error de conexión al actualizar el estado."); // Considera reemplazar esto con una modal personalizada
+                    }
+                });
+            }
         </script>
     </th:block>
 </body>
